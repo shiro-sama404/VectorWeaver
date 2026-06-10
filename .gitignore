@@ -1,0 +1,43 @@
+# Arquivos de compilação e binários
+*.o
+*.out
+*.exe
+*.dll
+*.a
+*.lib
+
+# Diretórios de saída gerados pelo Makefile
+/obj/
+/bin/
+
+# Pastas de dependências locais (caso usem vcpkg ou baixem repos inteiros)
+/vcpkg/
+/deps/vcpkg/
+*.tar.gz
+*.zip
+
+# Arquivos de IDE e Editores (VS Code, Visual Studio, CLion)
+.vscode/
+.vs/
+.idea/
+*.suo
+*.user
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.workspace
+compile_commands.json
+
+# Arquivos temporários e de sistema operacional
+Thumbs.db
+ehthumbs.db
+.DS_Store
+*.bak
+*.tmp
+*.log
+
+# ==========================================
+# EXCEÇÕES
+# ==========================================
+# Força o git a rastrear o header do JSON na pasta deps.
+!/deps/json.hpp
