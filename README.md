@@ -2,57 +2,70 @@
 
 **Simulador Interativo de Relógios Vetoriais e Ordenação de Eventos**
 
-O **VectorWeaver** é uma implementação em C++ de um sistema distribuído simulado, projetado para demonstrar na prática os conceitos de ordenação parcial de eventos, quebra de causalidade e resolução de estado usando Relógios Vetoriais (Vector Clocks).
+O **VectorWeaver** é uma biblioteca e simulador em **C++20** de um sistema distribuído, projetado para demonstrar na prática os conceitos de ordenação parcial de eventos, quebra de causalidade e resolução de estado usando Relógios Vetoriais (Vector Clocks).
 
-Projeto desenvolvido como requisito para a disciplina de **Computação Distribuída** na **Universidade Federal de Mato Grosso do Sul (UFMS)**.
+Projeto desenvolvido para a disciplina de **Computação Distribuída** na **Universidade Federal de Mato Grosso do Sul (UFMS)**.
 
 ---
 
 ## 🎯 Objetivo do Projeto
 
-Em sistemas distribuídos reais, o tempo físico sofre com *clock drift* e a rede impõe latências imprevisíveis. O VectorWeaver simula um ambiente de troca de mensagens onde pacotes sofrem atrasos aleatórios (caos de rede). Utilizando a regra matricial de Relógios Vetoriais, o sistema é capaz de identificar anomalias causais e reter mensagens no futuro em um *buffer* temporário, entregando-as apenas quando a ordem correta for restabelecida.
+Em sistemas distribuídos reais, o tempo físico sofre com *clock drift* e a rede impõe latências imprevisíveis. O VectorWeaver simula um ambiente assíncrono de troca de mensagens onde pacotes sofrem atrasos baseados em heurísticas matemáticas (caos de rede). Esta API avalia anomalias causais e retém mensagens adiantadas no futuro em um *buffer* temporário genérico, garantindo a entrega estrita (Causal Delivery).
 
 ## 🛠️ Tecnologias Utilizadas
 
-* **Linguagem:** C++17
-* **Comunicação de Rede:** [ZeroMQ (libzmq)](https://zeromq.org/) para abstração de sockets TCP e troca de mensagens P2P.
+* **Linguagem:** C++20 (Necessário devido a utilização intensiva de *Concepts*).
+* **Interface Gráfica:** Dear ImGui (Renderização de estado e topologia em tempo real via OpenGL/GLFW). *[Em Implementação]*
+* **Comunicação de Rede:** [ZeroMQ (cppzmq)](https://zeromq.org/) para abstração assíncrona de sockets TCP e troca de mensagens P2P.
 * **Serialização:** [`nlohmann/json`](https://github.com/nlohmann/json) para estruturação leve dos pacotes e vetores em trânsito.
-* **Compilação e Build:** Makefile padrão focado em ambiente Windows (MinGW-w64).
+* **Compilação e Build:** CMake.
 
-## 🚀 Como Compilar e Executar (Ambiente Windows)
+## 🚀 Como Compilar e Executar (Ambiente MSYS2/MinGW)
 
 ### Pré-requisitos
-1. Compilador `g++` via MSYS2/MinGW configurado nas variáveis de ambiente.
-2. Ferramenta `make` instalada.
-3. Biblioteca dinâmica do ZeroMQ disponível no sistema.
+Certifique-se de possuir o compilador C++20 e as dependências instaladas via gerenciador de pacotes `pacman`:
+```bash
+pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-zeromq mingw-w64-x86_64-glfw
+```
 
-### Passo 1: Compilação
-Na raiz do repositório, abra o terminal e execute:
-`make`
+### Passo 1: Compilação via CMake
 
-Isso gerará o executável `vector_weaver.exe` dentro da pasta `/bin`.
+Na raiz do repositório, crie o diretório de build e compile:
 
-### Passo 2: Simulando os Nós (Processos Distribuídos)
-Para demonstrar o funcionamento do Relógio Vetorial, inicialize três instâncias do sistema em **três terminais separados**. O sistema exige o ID do nó e a porta TCP local:
+```
+mkdir build
+cd build
+cmake .. -G "MinGW Makefiles"
+cmake --build .
+```
 
-**Terminal 1 (Nó A):**
-`.\bin\vector_weaver.exe --id 0 --port 5001`
+Isso gerará o executável VectorWeaver.exe dentro da pasta /bin.
 
-**Terminal 2 (Nó B):**
-`.\bin\vector_weaver.exe --id 1 --port 5002`
+### Passo 2: Simulando a Malha (Processos Distribuídos)
 
-**Terminal 3 (Nó C):**
-`.\bin\vector_weaver.exe --id 2 --port 5003`
+Inicialize três instâncias do sistema para compor a topologia da rede:
 
-A partir deste momento, os terminais estarão prontos para enviar mensagens uns aos outros, anexando o Relógio Vetorial atualizado a cada requisição.
+Terminal 1 (Nó P0):
+```.\bin\VectorWeaver.exe --id 0 --port 5001```
 
-## 📂 Arquitetura do Sistema
+Terminal 2 (Nó P1):
+```.\bin\VectorWeaver.exe --id 1 --port 5002```
 
-A base de código foi estruturada separando a lógica de estados da infraestrutura de rede:
+Terminal 3 (Nó P2):
+```.\bin\VectorWeaver.exe --id 2 --port 5003```
 
-* `src/vector_clock.cpp`: Máquina de estados isolada contendo a lógica matemática de atualização do vetor.
-* `src/network_manager.cpp`: Gerenciamento do ZeroMQ e injeção de latência simulada ("rede caótica").
-* `src/event_buffer.cpp`: Fila de retenção baseada em causalidade (Delivery Causal).
+## 📂 Arquitetura da API (**namespace vw**)
+
+O núcleo do VectorWeaver foi desacoplado em uma biblioteca (include/vectorweaver/), garantindo flexibilidade para integração em motores gráficos ou sistemas CLI:
+
+* **vector_clock.hpp**: Máquina de estados desacoplada que delega regras de validação para as Políticas de Ordenação.
+
+* **strategies.hpp**: Implementação do padrão Strategy para customização em tempo de execução da latência de rede (**UniformChaos**, **NoChaos**) e tratamento causal (**StrictCausalPolicy**, **RelaxedDeliveryPolicy**).
+
+* **event_buffer.hpp**: Fila genérica de retenção protegida por C++ Concepts (Payload P) restritivos para garantir segurança de memória no tráfego de dados estruturados.
+
+* **network_manager.hpp**: Camada de abstração do ZeroMQ assíncrono.
+
 
 ## 👥 Autores
 
@@ -60,5 +73,5 @@ A base de código foi estruturada separando a lógica de estados da infraestrutu
 | :---: | :---: |
 
 ## 📄 Referências
-* FIDGE, C. J. *Timestamps in message-passing systems that preserve the partial ordering.* 1988.
-* MATTERN, F. *Virtual time and global states of distributed systems.* 1989.
+* FIDGE, C. J. **Timestamps in message-passing systems that preserve the partial ordering.** 1988.
+* MATTERN, F. **Virtual time and global states of distributed systems.** 1989.
