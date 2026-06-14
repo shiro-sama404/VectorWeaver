@@ -29,7 +29,7 @@ void CliHandler::handle_send_message()
     auto target_port{0};
     std::string msg_text{};
 
-    std::cout << "Porta de destino (Ex: 5002): ";
+    std::cout << "Porta de destino: ";
     std::getline(std::cin, port_str);
     
     try 

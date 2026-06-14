@@ -14,7 +14,6 @@ public:
         local_clock{clock}, network{net}, state_mutex{mutex}
     { /* Do nothing */}
 
-    /// @brief Inicia o loop infinito do menu interativo.
     void run();
 
 private:

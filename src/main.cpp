@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
     std::mutex state_mutex{};
 
-    vw::VectorClock local_clock{node_id};
+    vw::VectorClock local_clock{node_id, /* std::make_unique<vw::RelaxedDeliveryPolicy>() */};
     vw::EventBuffer<std::string> event_buffer{};
     vw::NetworkManager network{std::make_unique<vw::UniformChaos>(0, 5000)};
 

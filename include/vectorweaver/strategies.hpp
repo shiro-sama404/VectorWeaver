@@ -115,13 +115,13 @@ public:
         if (msg_sender_val <= local_sender_val)
             return false;
 
-        for (const auto& [id, msg_val] : msg_clock)
+        /* for (const auto& [id, msg_val] : msg_clock)
             if (id != sender_id)
             {
                 auto local_val{local_clock.count(id) ? local_clock.at(id) : 0};
                 if (msg_val > local_val)
                     return false;
-            }
+            } */
 
         return true;
     }
